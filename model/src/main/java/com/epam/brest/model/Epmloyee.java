@@ -6,7 +6,16 @@ public class Epmloyee {
     private String firstName;
     private String lastName;
     private String email;
-    private String salary;
+    private Double salary;
+
+    public Double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Double salary) {
+        this.salary = salary;
+    }
+
     private  Integer departmentId;
 
     public Integer getEmployeeId() {
@@ -41,13 +50,7 @@ public class Epmloyee {
         this.email = email;
     }
 
-    public String getSalary() {
-        return salary;
-    }
 
-    public void setSalary(String salary) {
-        this.salary = salary;
-    }
 
     public Integer getDepartmentId() {
         return departmentId;
