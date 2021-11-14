@@ -1,18 +1,44 @@
 package com.epam.brest.dao;
 
 import com.epam.brest.model.Department;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
-public class DepartmentDaoJDBCImpl implements DepartmentDao{
+public class DepartmentDaoJDBCImpl implements DepartmentDao {
+
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    private final String SQL_ALL_DEPARTMENTS="select d.department_id, d.department_name from department d order by d.department_name";
+    private final String SQL_CREATE_DEPARTMENT="insert into department(department_name) values(:departmentName)";
+
+    public DepartmentDaoJDBCImpl(DataSource dataSource) {
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+    }
+
     @Override
     public List<Department> findAll() {
-        return null;
+        return namedParameterJdbcTemplate.query(SQL_ALL_DEPARTMENTS, new DepartmentRowMapper());
     }
 
     @Override
     public Integer create(Department department) {
-        return null;
+
+        //TODO: isDepartmentUnique throw new IllegalArgumentException
+
+        SqlParameterSource sqlParameterSource =
+                new MapSqlParameterSource("departmentName", department.getDepartmentName().toUpperCase());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(SQL_CREATE_DEPARTMENT, sqlParameterSource, keyHolder);
+        return (Integer) keyHolder.getKey();
     }
 
     @Override
@@ -24,4 +50,16 @@ public class DepartmentDaoJDBCImpl implements DepartmentDao{
     public Integer delete(Integer departmentId) {
         return null;
     }
+
+    private class DepartmentRowMapper implements RowMapper<Department> {
+
+        @Override
+        public Department mapRow(ResultSet resultSet, int i) throws SQLException {
+            Department department = new Department();
+            department.setDepartmentId(resultSet.getInt("department_id"));
+            department.setDepartmentName(resultSet.getString("department_name"));
+            return department;
+        }
+    }
+
 }
